@@ -43,46 +43,44 @@
 
 Open a terminal and run:
 
-```bash
 cd next-backend
 npm install
 npm run dev
-```
+
 
 Create a `.env.local` file inside `next-backend/`:
 
-```env
+
 MONGODB_URI=YOUR_MONGODB_CONNECTION_STRING
 JWT_SECRET=YOUR_JWT_SECRET
-```
+
 
 The backend runs on:
-
-```text
 http://localhost:3000
-```
+
 
 ### 2. Frontend Setup (`react-frontend/`)
 
 Open another terminal and run:
 
-```bash
 cd react-frontend
 npm install
 npm run dev
-```
+
 
 Create a `.env` file inside `react-frontend/`:
 
-```env
 VITE_API_URL=http://localhost:3000
-```
 
 The frontend runs on:
-
-```text
 http://localhost:5173
-```
+
+## Project Links
+
+- **GitHub Repository:** https://github.com/sukichow129-dot/wad-final-2026
+- **Frontend:** https://wad-final-2026-forntend.vercel.app
+- **Backend:** https://wad-final-2026-backend.vercel.app
+
 
 ### 3. Testing Walkthrough
 
