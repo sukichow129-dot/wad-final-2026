@@ -41,16 +41,28 @@ export async function GET(request) {
     const client = await getClientPromise();
     const db = client.db();
 
+    // Match enrollment by student ID or email
     const courses = await db
       .collection("courses")
       .find({
-        "enrolledStudents.id": user.id,
+        $or: [
+          {
+            "enrolledStudents.id": user.id,
+          },
+          {
+            "enrolledStudents.email": user.email,
+          },
+        ],
       })
       .toArray();
 
     return successResponse(courses, 200);
   } catch (error) {
     console.error(error);
-    return errorResponse("Failed to get enrolled courses", 500);
+
+    return errorResponse(
+      "Failed to get enrolled courses",
+      500,
+    );
   }
 }
