@@ -5,6 +5,7 @@ import {
   X_HEADER_USER_EMAIL,
   X_HEADER_USER_ID,
   X_HEADER_USER_NAME,
+  X_HEADER_USER_ROLE,
 } from "./lib/constant";
 
 export function proxy(request) {
@@ -26,6 +27,7 @@ export function proxy(request) {
   requestHeaders.set(X_HEADER_USER_ID, user.id);
   requestHeaders.set(X_HEADER_USER_EMAIL, user.email);
   requestHeaders.set(X_HEADER_USER_NAME, user.username);
+  requestHeaders.set(X_HEADER_USER_ROLE, user.role);
 
   return NextResponse.next({
     request: {
