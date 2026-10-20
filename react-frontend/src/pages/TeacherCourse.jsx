@@ -19,12 +19,30 @@ export default function TeacherCourse() {
     status: "Open",
   });
 
+  // Get JWT token
+  function getAuthHeaders(includeContentType = false) {
+    const token = localStorage.getItem("token");
+
+    const headers = {};
+
+    if (includeContentType) {
+      headers["Content-Type"] = "application/json";
+    }
+
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    return headers;
+  }
+
   async function loadCourse() {
     try {
       const response = await fetch(
         `${API_URL}/api/course/${courseId}`,
         {
           credentials: "include",
+          headers: getAuthHeaders(),
         },
       );
 
@@ -71,10 +89,11 @@ export default function TeacherCourse() {
         `${API_URL}/api/course/${courseId}`,
         {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
+
+          headers: getAuthHeaders(true),
+
           credentials: "include",
+
           body: JSON.stringify({
             courseName: form.courseName,
             duration: Number(form.duration),
@@ -226,7 +245,11 @@ export default function TeacherCourse() {
         </button>
       </form>
 
-      {message && <p><strong>{message}</strong></p>}
+      {message && (
+        <p>
+          <strong>{message}</strong>
+        </p>
+      )}
 
       <hr />
 

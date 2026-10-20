@@ -4,13 +4,19 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 export function verifyJWT(req) {
   try {
-    const token = req.cookies.get("token")?.value;
+    let token = req.cookies.get("token")?.value;
 
     if (!token) {
-      return null;
+      const authHeader = req.headers.get("authorization");
+
+      if (authHeader?.startsWith("Bearer ")) {
+        token = authHeader.substring(7);
+      }
     }
-    const decoded = jwt.verify(token, JWT_SECRET);
-    return decoded;
+
+    if (!token) return null;
+
+    return jwt.verify(token, JWT_SECRET);
   } catch (err) {
     console.log(err);
     return null;

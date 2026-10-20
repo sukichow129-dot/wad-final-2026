@@ -13,6 +13,19 @@ export default function StudentDashboard() {
   const [search, setSearch] = useState("");
   const [message, setMessage] = useState("");
 
+  // Get JWT token
+  function getAuthHeaders() {
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      return {
+        Authorization: `Bearer ${token}`,
+      };
+    }
+
+    return {};
+  }
+
   async function loadCourses(searchText = "") {
     try {
       const url = searchText
@@ -21,6 +34,7 @@ export default function StudentDashboard() {
 
       const response = await fetch(url, {
         credentials: "include",
+        headers: getAuthHeaders(),
       });
 
       const data = await response.json();
@@ -31,6 +45,7 @@ export default function StudentDashboard() {
       }
 
       setCourses(data);
+      setMessage("");
     } catch (error) {
       console.error(error);
       setMessage("Cannot connect to server");
@@ -43,6 +58,7 @@ export default function StudentDashboard() {
         `${API_URL}/api/course/enrolled`,
         {
           credentials: "include",
+          headers: getAuthHeaders(),
         },
       );
 

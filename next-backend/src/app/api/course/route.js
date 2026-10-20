@@ -7,17 +7,23 @@ import { NextResponse } from "next/server";
 import corsHeaders from "@/lib/cors";
 
 function getUser(request) {
-    try {
-        const token = request.cookies.get("token")?.value;
+  try {
+    let token = request.cookies.get("token")?.value;
 
-        if (!token) {
-            return null;
-        }
+    if (!token) {
+      const authHeader = request.headers.get("authorization");
 
-        return jwt.verify(token, process.env.JWT_SECRET);
-    } catch {
-        return null;
+      if (authHeader?.startsWith("Bearer ")) {
+        token = authHeader.substring(7);
+      }
     }
+
+    if (!token) return null;
+
+    return jwt.verify(token, process.env.JWT_SECRET);
+  } catch {
+    return null;
+  }
 }
 
 // GET courses

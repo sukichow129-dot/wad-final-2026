@@ -20,10 +20,28 @@ export default function TeacherDashboard() {
     status: "Open",
   });
 
+  // Get JWT token
+  function getAuthHeaders(includeContentType = false) {
+    const token = localStorage.getItem("token");
+
+    const headers = {};
+
+    if (includeContentType) {
+      headers["Content-Type"] = "application/json";
+    }
+
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    return headers;
+  }
+
   async function loadCourses() {
     try {
       const response = await fetch(`${API_URL}/api/course`, {
         credentials: "include",
+        headers: getAuthHeaders(),
       });
 
       if (!response.ok) {
@@ -33,6 +51,7 @@ export default function TeacherDashboard() {
 
       const data = await response.json();
       setCourses(data);
+      setMessage("");
     } catch (error) {
       console.error(error);
       setMessage("Cannot connect to server");
@@ -57,10 +76,11 @@ export default function TeacherDashboard() {
     try {
       const response = await fetch(`${API_URL}/api/course`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+
+        headers: getAuthHeaders(true),
+
         credentials: "include",
+
         body: JSON.stringify({
           courseName: form.courseName,
           duration: Number(form.duration),
@@ -117,6 +137,8 @@ export default function TeacherDashboard() {
         {
           method: "DELETE",
           credentials: "include",
+
+          headers: getAuthHeaders(),
         },
       );
 
@@ -267,9 +289,7 @@ export default function TeacherDashboard() {
             {courses.map((course) => (
               <tr key={course._id}>
                 <td>{course.courseName}</td>
-
                 <td>{course.duration}</td>
-
                 <td>{course.price}</td>
 
                 <td>
@@ -277,7 +297,6 @@ export default function TeacherDashboard() {
                 </td>
 
                 <td>{course.maxStudent}</td>
-
                 <td>{course.status}</td>
 
                 <td>

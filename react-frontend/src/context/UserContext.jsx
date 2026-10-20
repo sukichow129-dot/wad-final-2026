@@ -13,9 +13,16 @@ export function UserProvider({ children }) {
   // Check current logged-in user
   async function checkUser() {
     try {
+      const token = localStorage.getItem("token");
+
       const response = await fetch(`${API_URL}/api/user`, {
         method: "GET",
         credentials: "include",
+        headers: token
+          ? {
+              Authorization: `Bearer ${token}`,
+            }
+          : {},
       });
 
       if (response.ok) {
@@ -56,6 +63,9 @@ export function UserProvider({ children }) {
         };
       }
 
+      // Save JWT token
+      localStorage.setItem("token", data.token);
+
       setUser(data.user);
 
       return {
@@ -75,13 +85,23 @@ export function UserProvider({ children }) {
   // Logout
   async function logout() {
     try {
+      const token = localStorage.getItem("token");
+
       await fetch(`${API_URL}/api/user`, {
         method: "DELETE",
         credentials: "include",
+        headers: token
+          ? {
+              Authorization: `Bearer ${token}`,
+            }
+          : {},
       });
     } catch (error) {
       console.error("Logout error:", error);
     }
+
+    // Remove JWT token
+    localStorage.removeItem("token");
 
     setUser(null);
   }

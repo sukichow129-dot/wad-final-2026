@@ -4,11 +4,17 @@ import jwt from "jsonwebtoken";
 
 function getUser(request) {
   try {
-    const token = request.cookies.get("token")?.value;
+    let token = request.cookies.get("token")?.value;
 
     if (!token) {
-      return null;
+      const authHeader = request.headers.get("authorization");
+
+      if (authHeader?.startsWith("Bearer ")) {
+        token = authHeader.substring(7);
+      }
     }
+
+    if (!token) return null;
 
     return jwt.verify(token, process.env.JWT_SECRET);
   } catch {

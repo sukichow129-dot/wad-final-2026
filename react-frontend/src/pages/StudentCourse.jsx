@@ -10,12 +10,26 @@ export default function StudentCourse() {
   const [course, setCourse] = useState(null);
   const [message, setMessage] = useState("");
 
+  // Get JWT token
+  function getAuthHeaders() {
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      return {
+        Authorization: `Bearer ${token}`,
+      };
+    }
+
+    return {};
+  }
+
   async function loadCourse() {
     try {
       const response = await fetch(
         `${API_URL}/api/course/${courseId}`,
         {
           credentials: "include",
+          headers: getAuthHeaders(),
         },
       );
 
@@ -46,6 +60,7 @@ export default function StudentCourse() {
         {
           method: "POST",
           credentials: "include",
+          headers: getAuthHeaders(),
         },
       );
 
