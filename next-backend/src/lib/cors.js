@@ -1,7 +1,7 @@
 const FRONTEND_URL =
   process.env.NODE_ENV === "development"
     ? "http://localhost:5173"
-    : "https://wad-final-2026-frontend.vercel.app";
+    : "https://wad-final-2026-forntend.vercel.app";
 
 const corsHeaders = {
   "Access-Control-Allow-Credentials": "true",
