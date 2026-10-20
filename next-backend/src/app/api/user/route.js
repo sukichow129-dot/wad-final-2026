@@ -64,24 +64,39 @@ export async function PUT(request) {
         const { email, password } = body;
 
         if (!email || !password) {
-            return errorResponse("Email and password are required", 400);
+            return errorResponse(
+                "Email and password are required",
+                400,
+            );
         }
 
         const client = await getClientPromise();
         const db = client.db();
 
-        const user = await db.collection("users").findOne({ email });
+        const user = await db.collection("users").findOne({
+            email,
+        });
 
         if (!user) {
-            return errorResponse("Invalid email or password", 401);
+            return errorResponse(
+                "Invalid email or password",
+                401,
+            );
         }
 
-        const passwordMatch = await bcrypt.compare(password, user.password);
+        const passwordMatch = await bcrypt.compare(
+            password,
+            user.password,
+        );
 
         if (!passwordMatch) {
-            return errorResponse("Invalid email or password", 401);
+            return errorResponse(
+                "Invalid email or password",
+                401,
+            );
         }
 
+        // Create JWT token
         const token = jwt.sign(
             {
                 id: user._id.toString(),
@@ -95,9 +110,12 @@ export async function PUT(request) {
             },
         );
 
+        // IMPORTANT:
+        // Return token to frontend so it can be stored in localStorage
         const response = successResponse(
             {
                 message: "Login successful",
+                token,
                 user: {
                     id: user._id.toString(),
                     username: user.username,
@@ -108,15 +126,17 @@ export async function PUT(request) {
             200,
         );
 
+        // Keep cookie authentication too
         response.cookies.set("token", token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
-            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+            sameSite:
+                process.env.NODE_ENV === "production"
+                    ? "none"
+                    : "lax",
             path: "/",
             maxAge: 60 * 60 * 24,
         });
-
-        return response;
 
         return response;
     } catch (error) {
@@ -127,58 +147,76 @@ export async function PUT(request) {
 
 // Get current logged-in user
 export async function GET(request) {
-  try {
-    const token = request.cookies.get("token")?.value;
+    try {
+        // First try Cookie
+        let token = request.cookies.get("token")?.value;
 
-    if (!token) {
-      return errorResponse("Unauthorized", 401);
+        // If Cookie is unavailable, try Authorization Bearer token
+        if (!token) {
+            const authHeader =
+                request.headers.get("authorization");
+
+            if (authHeader?.startsWith("Bearer ")) {
+                token = authHeader.substring(7);
+            }
+        }
+
+        if (!token) {
+            return errorResponse("Unauthorized", 401);
+        }
+
+        const user = jwt.verify(
+            token,
+            process.env.JWT_SECRET,
+        );
+
+        return successResponse(
+            {
+                user: {
+                    id: user.id,
+                    username: user.username,
+                    email: user.email,
+                    role: user.role,
+                },
+            },
+            200,
+        );
+    } catch (error) {
+        return errorResponse("Unauthorized", 401);
     }
-
-    const user = jwt.verify(token, process.env.JWT_SECRET);
-
-    return successResponse(
-      {
-        user: {
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          role: user.role,
-        },
-      },
-      200,
-    );
-  } catch (error) {
-    return errorResponse("Unauthorized", 401);
-  }
 }
 
 // Logout
 export async function DELETE() {
-  try {
-    const response = successResponse(
-      {
-        message: "Logout successful",
-      },
-      200,
-    );
+    try {
+        const response = successResponse(
+            {
+                message: "Logout successful",
+            },
+            200,
+        );
 
-    response.cookies.set("token", "", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      path: "/",
-      maxAge: 0,
-    });
+        response.cookies.set("token", "", {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite:
+                process.env.NODE_ENV === "production"
+                    ? "none"
+                    : "lax",
+            path: "/",
+            maxAge: 0,
+        });
 
-    return response;
-  } catch (error) {
-    return errorResponse("Logout failed", 500);
-  }
+        return response;
+    } catch (error) {
+        return errorResponse("Logout failed", 500);
+    }
 }
 
+// CORS preflight
 export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 204,
-    headers: corsHeaders,
-  });
+    return new NextResponse(null, {
+        status: 204,
+        headers: corsHeaders,
+    });
 }
